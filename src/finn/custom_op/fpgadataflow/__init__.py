@@ -64,6 +64,9 @@ from finn.custom_op.fpgadataflow.upsampler import UpsampleNearestNeighbour_Batch
 from finn.custom_op.fpgadataflow.vectorvectoractivation import VectorVectorActivation
 
 from finn.custom_op.fpgadataflow.attention import ScaledDotProductAttention
+from finn.custom_op.fpgadataflow.attention_heads import (
+    SplitMultiHeads, MergeMultiHeads
+)
 
 custom_op = dict()
 
@@ -96,3 +99,5 @@ custom_op["CheckSum"] = CheckSum
 custom_op["StreamingEltwise"] = StreamingEltwise
 custom_op["FMPadding_rtl"] = FMPadding_rtl
 custom_op["ScaledDotProductAttention"] = ScaledDotProductAttention
+custom_op["SplitMultiHeads"] = SplitMultiHeads
+custom_op["MergeMultiHeads"] = MergeMultiHeads
