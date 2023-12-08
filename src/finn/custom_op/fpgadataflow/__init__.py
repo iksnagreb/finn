@@ -67,6 +67,7 @@ from finn.custom_op.fpgadataflow.attention import ScaledDotProductAttention
 from finn.custom_op.fpgadataflow.attention_heads import (
     SplitMultiHeads, MergeMultiHeads
 )
+from finn.custom_op.fpgadataflow.replicate_stream import ReplicateStream
 
 custom_op = dict()
 
@@ -101,3 +102,4 @@ custom_op["FMPadding_rtl"] = FMPadding_rtl
 custom_op["ScaledDotProductAttention"] = ScaledDotProductAttention
 custom_op["SplitMultiHeads"] = SplitMultiHeads
 custom_op["MergeMultiHeads"] = MergeMultiHeads
+custom_op["ReplicateStream"] = ReplicateStream
