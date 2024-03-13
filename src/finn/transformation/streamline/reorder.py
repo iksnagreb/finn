@@ -891,6 +891,11 @@ class MoveOpPastFork(Transformation):
                 if unique_consumer:
                     continue
 
+                # Skip reordering if the operator has parameters covering more
+                # than one axis
+                if op_init_param is not None and len(op_init_param.shape) > 1:
+                    continue
+
                 for consumer_node in consumers[1:]:
                     # create new node
                     new_output_tensor_name = model.make_new_valueinfo_name()
