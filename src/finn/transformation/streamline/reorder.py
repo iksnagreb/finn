@@ -893,8 +893,12 @@ class MoveOpPastFork(Transformation):
 
                 # Skip reordering if the operator has parameters covering more
                 # than one axis
-                if op_init_param is not None and len(op_init_param.shape) > 1:
-                    continue
+                if op_init_param is not None:
+                    # Count the number of actual dimensions (size > 1) of the
+                    # parameter tensor
+                    if len([s for s in op_init_param.shape if s > 1]) > 1:
+                        # Do not transform this for now...
+                        continue
 
                 for consumer_node in consumers[1:]:
                     # create new node
