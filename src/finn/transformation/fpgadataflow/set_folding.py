@@ -120,6 +120,7 @@ class SetFolding(Transformation):
             "GlobalAccPool_hls",
             "Thresholding_hls",
             "Thresholding_rtl",
+            "ReplicateStream_hls",
             *ELEMENTWISE_BINARY_OPS,
         ]
         # these ops use SIMD parallelism, up to a max value of NumChannels
