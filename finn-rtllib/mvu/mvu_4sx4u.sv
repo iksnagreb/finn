@@ -36,7 +36,7 @@ module mvu_4sx4u #(
 	int unsigned  SIMD,
 	int unsigned  ACCU_WIDTH,
 
-	int unsigned  VERSION = 1,
+	int unsigned  VERSION = 2,
 	bit  SIGNED_ACTIVATIONS = 0,
 	bit  FORCE_BEHAVIORAL = 0
 )(
