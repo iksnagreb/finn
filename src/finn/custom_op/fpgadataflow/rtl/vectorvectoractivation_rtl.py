@@ -33,9 +33,8 @@ from qonnx.core.datatype import DataType
 
 from finn.custom_op.fpgadataflow.rtlbackend import RTLBackend
 from finn.custom_op.fpgadataflow.vectorvectoractivation import VVAU
-from finn.util.basic import get_rtlsim_trace_depth, make_build_dir
+from finn.util.basic import get_rtlsim_trace_depth, is_versal, make_build_dir
 from finn.util.data_packing import npy_to_rtlsim_input, rtlsim_output_to_npy
-from finn.util.fpgadataflow import is_versal
 
 try:
     from pyverilator import PyVerilator
@@ -143,7 +142,7 @@ class VVAU_rtl(VVAU, RTLBackend):
     def lut_estimation(self):
         return 0
 
-    def dsp_estimation(self):
+    def dsp_estimation(self, fpgapart):
         P = self.get_nodeattr("PE")
         Q = self.get_nodeattr("SIMD")
         return int(P * np.ceil(Q / 3))
@@ -177,6 +176,11 @@ class VVAU_rtl(VVAU, RTLBackend):
         self.generate_params(model, code_gen_dir)
 
         template_path, code_gen_dict = self.prepare_codegen_default(fpgapart, clk)
+        # determine if weights are narrow range and add parameter to code gen dict
+        weights = model.get_initializer(self.onnx_node.input[1])
+        wdt = self.get_weight_datatype()
+        narrow_weights = 0 if np.min(weights) == wdt.min() else 1
+        code_gen_dict["$NARROW_WEIGHTS$"] = str(narrow_weights)
         # add general parameters to dictionary
         code_gen_dict["$MODULE_NAME_AXI_WRAPPER$"] = [self.get_verilog_top_module_name()]
         # save top module name so we can refer to it after this node has been renamed
