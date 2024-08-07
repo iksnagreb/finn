@@ -1845,3 +1845,107 @@ class InferElementwiseBinaryOperation(Transformation):
         # Return the transformed model and indicate whether the graph actually
         # has been transformed
         return model, graph_modified
+
+
+# Converts the Squeeze operation to the corresponding FINN custom operation
+class InferSqueeze(Transformation):
+    # Applies the transform to a whole model graph
+    def apply(self, model: ModelWrapper):  # noqa
+        # Get the model graph out of the model wrapper object
+        graph = model.graph
+        # Keep track of whether the graph has been modified
+        graph_modified = False
+        # Iterate all nodes in the graph keeping track of the index
+        for index, node in enumerate(graph.node):
+            # Handles Squeeze ONNX operations
+            if node.op_type == "Squeeze":
+                # Skip already converted nodes
+                if node.domain == "finn.custom_op.fpgadataflow":
+                    # Skip without warning
+                    continue
+                # Transplant this operator into our FINN domain
+                node.domain = "finn.custom_op.fpgadataflow"  # noqa: Duplicate
+                # Now we can get the CustomOp wrapper instance providing easier
+                # attribute access
+                inst: HWCustomOp = getCustomOp(node)
+                # Set the backend attribute to mark this an operation supported
+                # to be implemented on an FPGA by FINN
+                inst.set_nodeattr("backend", "fpgadataflow")
+                # Ge the input and output tensor names
+                inp, out = node.input[0], node.output[0]
+                # Set input/output shape and datatype node attributes required
+                # by FINN custom op
+                inst.set_nodeattr(
+                    "inp_dtype", str(model.get_tensor_datatype(inp))
+                )
+                inst.set_nodeattr("inp_shape", model.get_tensor_shape(inp))
+                inst.set_nodeattr(
+                    "out_dtype", str(model.get_tensor_datatype(out))
+                )
+                inst.set_nodeattr("out_shape", model.get_tensor_shape(out))
+                # Consider the graph to be modified, triggering exhaustive
+                # re-application of this transformation
+                graph_modified = True
+                # Exiting here triggers type and shape inference and cleanup
+                # after each transformed node. This helps QONNX to behave
+                # better/more consistent in certain cases...
+                break
+        # Re-do shape and data type annotations after potential changes to the
+        # model graph
+        model = model.transform(InferShapes())
+        model = model.transform(InferDataTypes())
+        # Return the transformed model and indicate whether the graph actually
+        # has been transformed
+        return model, graph_modified
+
+
+# Converts the Unsqueeze operation to the corresponding FINN custom operation
+class InferUnsqueeze(Transformation):
+    # Applies the transform to a whole model graph
+    def apply(self, model: ModelWrapper):  # noqa
+        # Get the model graph out of the model wrapper object
+        graph = model.graph
+        # Keep track of whether the graph has been modified
+        graph_modified = False
+        # Iterate all nodes in the graph keeping track of the index
+        for index, node in enumerate(graph.node):
+            # Handles Squeeze ONNX operations
+            if node.op_type == "Unsqueeze":
+                # Skip already converted nodes  # noqa: Duplicate
+                if node.domain == "finn.custom_op.fpgadataflow":
+                    # Skip without warning
+                    continue
+                # Transplant this operator into our FINN domain
+                node.domain = "finn.custom_op.fpgadataflow"
+                # Now we can get the CustomOp wrapper instance providing easier
+                # attribute access
+                inst: HWCustomOp = getCustomOp(node)
+                # Set the backend attribute to mark this an operation supported
+                # to be implemented on an FPGA by FINN
+                inst.set_nodeattr("backend", "fpgadataflow")
+                # Ge the input and output tensor names
+                inp, out = node.input[0], node.output[0]
+                # Set input/output shape and datatype node attributes required
+                # by FINN custom op
+                inst.set_nodeattr(
+                    "inp_dtype", str(model.get_tensor_datatype(inp))
+                )
+                inst.set_nodeattr("inp_shape", model.get_tensor_shape(inp))
+                inst.set_nodeattr(
+                    "out_dtype", str(model.get_tensor_datatype(out))
+                )
+                inst.set_nodeattr("out_shape", model.get_tensor_shape(out))
+                # Consider the graph to be modified, triggering exhaustive
+                # re-application of this transformation
+                graph_modified = True
+                # Exiting here triggers type and shape inference and cleanup
+                # after each transformed node. This helps QONNX to behave
+                # better/more consistent in certain cases...
+                break
+        # Re-do shape and data type annotations after potential changes to the
+        # model graph
+        model = model.transform(InferShapes())
+        model = model.transform(InferDataTypes())
+        # Return the transformed model and indicate whether the graph actually
+        # has been transformed
+        return model, graph_modified
