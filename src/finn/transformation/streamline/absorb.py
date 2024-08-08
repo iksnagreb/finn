@@ -234,7 +234,7 @@ class FactorOutMulSignMagnitude(Transformation):
         graph_modified = False
         for n in graph.node:
             node_ind += 1
-            if n.op_type == "Mul":
+            if n.op_type == "Mul" and not model.is_join_node(n):
                 mul_weight_name = n.input[1]
                 A = model.get_initializer(mul_weight_name)
                 assert A is not None, "Initializer for mul weights is not set."
